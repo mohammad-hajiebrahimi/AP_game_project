@@ -23,7 +23,16 @@ vector < vector < string >> read_record(string fname) {
     }
     return content;
 }
+int read_game_time(string fname){
+    fstream file(fname, ios::in);
+    string line;
+    getline(file, line);
+    int game_time = stoi(line);
+    return game_time;
+}
 int main(){
     vector < vector < string >> map = read_record(MAP_PATH);
+    int game_time = read_game_time(MAP_PATH);
+
     return 0;
 }
