@@ -8,9 +8,18 @@ using namespace std;
 const string MAP_PATH = "map.txt";
 const char CSV_DELIMITER = ',';
 const string WALL1 = "B";
+const string WALL2 = "P";
 const string HIDE_KEY = "K";
 const string HIDE_POWER2 = "L";
 const string HIDE_POWER4 = "S";
+const string AGENT = "A";
+const string H_ENEMY = "H";
+const string V_ENEMY = "V";
+const string V_ENEMYDOWN = "VD";
+const string V_ENEMYUP = "VU";
+const string H_ENEMYLEFT = "HL";
+const string H_ENEMYRIGHT = "HR";
+const string EMPTY = "-";
 
 typedef vector < vector < string >>    VVS;
 
@@ -18,14 +27,24 @@ VVS read_record(string fname) {
     VVS content;
     vector < string > row;
     string line, word;
+    srand(time(0));
     fstream file(fname, ios::in);
     if (file.is_open()) {
         getline(file, line);
         while (getline(file, line)) {
             row.clear();
             stringstream str(line);
-            while (getline(str, word, CSV_DELIMITER))
+            while (getline(str, word, CSV_DELIMITER)){
+                if(word == V_ENEMY){
+                    if(rand()%2==0){word=V_ENEMYUP;}
+                    else{word=V_ENEMYDOWN;}
+                }
+                if(word == H_ENEMY){
+                    if(rand()%2==0){word=H_ENEMYLEFT;}
+                    else{word=H_ENEMYRIGHT;}
+                }
                 row.push_back(word);
+            }
             content.push_back(row);
         }
     }
@@ -45,11 +64,29 @@ public:
     void init_map();
     int get_game_time(){return game_time;}
     VVS get_map(){return map;}
+    void set_map(VVS map1){map = map1;}
+    void update_enemy();
 private:
     VVS map;
     int game_time;
 };
 
+class Agent{
+public:
+    Agent();
+    void init_agent();
+    pair<int,int> get_pos(){return pos;}
+    void set_pos(pair<int,int> pos1){pos = pos1;}
+private:
+    pair<int , int> pos;
+};
+
+void Agent::init_agent(){
+    pos = make_pair(0,0);
+}
+Agent::Agent(){
+    init_agent();
+}
 Map::Map(){
     init_map();
 }
@@ -93,10 +130,71 @@ void Map::init_map(){
     map = read_record(MAP_PATH);
     game_time = read_game_time(MAP_PATH);
     map = init_keys_power(map);
-    show_map(map);
+}
+void Map::update_enemy(){
+    VVS map1;
+    for (int i=0;i<map.size();i++){
+        vector<string>row;
+        for(int j=0;j<map[i].size();j++){
+            row.push_back(EMPTY);
+        }
+        map1.push_back(row);
+    }
+    for(int i = 0;i<map.size();i++){
+        for (int j=0;j<map[i].size();j++){
+            if (map[i][j]== V_ENEMYUP && map[i-1][j]==EMPTY)map1[i-1][j] = map[i][j];
+            else if (map[i][j]== V_ENEMYUP && map[i-1][j]!=EMPTY){
+                map[i][j] = V_ENEMYDOWN;
+                map1[i+1][j] = map[i][j];
+            }
+            else if (map[i][j]== V_ENEMYDOWN && map[i+1][j]==EMPTY)map1[i+1][j] = map[i][j];
+            else if (map[i][j]== V_ENEMYDOWN && map[i+1][j]!=EMPTY){
+                map[i][j] = V_ENEMYUP;
+                map1[i-1][j] = map[i][j];
+            }
+            else if (map[i][j]== H_ENEMYLEFT && map[i][j-1]==EMPTY)map1[i][j-1] = map[i][j];
+            else if (map[i][j] == H_ENEMYLEFT && map[i][j-1]!=EMPTY){
+                map[i][j] = H_ENEMYRIGHT;
+                map1[i][j+1] = map[i][j];
+            }
+            else if (map[i][j]== H_ENEMYRIGHT && map[i][j+1]==EMPTY)map1[i][j+1] = map[i][j];
+            else if (map[i][j] == H_ENEMYRIGHT && map[i][j+1]!=EMPTY){
+                map[i][j] = H_ENEMYLEFT;
+                map1[i][j-1] = map[i][j];
+            }
+            if(map[i][j]!=EMPTY && map[i][j]!= H_ENEMYRIGHT && map[i][j]!= H_ENEMYLEFT && map[i][j]!= V_ENEMYDOWN && map[i][j]!= V_ENEMYUP)map1[i][j]=map[i][j];
+        }
+    }
+    map = map1;
+}
+
+class Game{
+public:
+    Game();
+    void init_game();
+    VVS get_map(){return board.get_map();}
+    void turn();
+
+private:
+    Map board;
+    Agent agent;
+    int end_game;
+};
+Game::Game(){
+    init_game();
+}
+
+void Game::init_game(){
+    end_game = 0;
+    cout<<"game start"<<endl;
+}
+void Game::turn(){
+    board.update_enemy();
 }
 int main(){
-    Map board;
-    //cout<<board.get_game_time();
+    Game game;
+    show_map(game.get_map());
+    game.turn();
+    show_map(game.get_map());
     return 0;
 }
