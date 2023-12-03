@@ -6,8 +6,10 @@ using namespace std;
 #define tab '\t'
 const string MAP_PATH = "map.txt";
 const char CSV_DELIMITER = ',';
-vector < vector < string >> read_record(string fname) {
-    vector < vector < string >> content;
+typedef vector < vector < string >>    VVS;
+
+VVS read_record(string fname) {
+    VVS content;
     vector < string > row;
     string line, word;
     fstream file(fname, ios::in);
@@ -30,9 +32,27 @@ int read_game_time(string fname){
     int game_time = stoi(line);
     return game_time;
 }
-int main(){
-    vector < vector < string >> map = read_record(MAP_PATH);
-    int game_time = read_game_time(MAP_PATH);
 
+class Map{
+public:
+    Map();
+    void init_map(){
+        map = read_record(MAP_PATH);
+        game_time = read_game_time(MAP_PATH);
+    }
+    int get_game_time(){return game_time;}
+    VVS get_map(){return map;}
+
+private:
+    VVS map;
+    int game_time;
+};
+
+Map::Map(){
+    init_map();
+}
+int main(){
+    Map board;
+    cout<<board.get_game_time();
     return 0;
 }
