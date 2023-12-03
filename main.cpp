@@ -189,12 +189,24 @@ void Game::init_game(){
     cout<<"game start"<<endl;
 }
 void Game::turn(){
-    board.update_enemy();
+    time_t start;
+    start=time(0);
+    while(1)
+    {
+
+        if(time(0)-start==10)
+        {
+        board.update_enemy();
+        cout<<"--------------------------"<<endl;
+        show_map(board.get_map());
+        start=start+10;
+        }
+    }
+
 }
 int main(){
     Game game;
     show_map(game.get_map());
     game.turn();
-    show_map(game.get_map());
     return 0;
 }
