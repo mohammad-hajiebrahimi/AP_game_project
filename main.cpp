@@ -9,6 +9,7 @@ const string MAP_PATH = "map.txt";
 const char CSV_DELIMITER = ',';
 const string WALL1 = "B";
 const string WALL2 = "P";
+const string DOOR = "D";
 const string HIDE_KEY = "K";
 const string HIDE_POWER2 = "L";
 const string HIDE_POWER4 = "S";
@@ -77,12 +78,13 @@ public:
     void init_agent();
     pair<int,int> get_pos(){return pos;}
     void set_pos(pair<int,int> pos1){pos = pos1;}
+    void make_move(string command, VVS map);
 private:
     pair<int , int> pos;
 };
 
 void Agent::init_agent(){
-    pos = make_pair(0,0);
+    pos = make_pair(2,1);
 }
 Agent::Agent(){
     init_agent();
@@ -118,10 +120,15 @@ VVS init_keys_power(VVS map){
     }
     return map;
 }
-void show_map(VVS map){
+void show_map(VVS map, pair<int,int> pos){
     for(int i=0;i<map.size();i++){
         for (int j=0;j<map[i].size();j++){
-            cout<<map[i][j]<<CSV_DELIMITER;
+            if (i==pos.first && j==pos.second){
+                cout<<AGENT<<CSV_DELIMITER;
+            }
+            else{
+                cout<<map[i][j]<<CSV_DELIMITER;
+            }
         }
         cout<<endl;
     }
@@ -167,12 +174,26 @@ void Map::update_enemy(){
     }
     map = map1;
 }
-
+void Agent::make_move(string command, VVS map){
+    if (command == "w" && map[pos.first-1][pos.second]!= DOOR && map[pos.first-1][pos.second]!=HIDE_POWER2 && map[pos.first-1][pos.second]!=HIDE_POWER4 &&map[pos.first-1][pos.second]!=HIDE_KEY && map[pos.first-1][pos.second]!= WALL2){
+        pos = make_pair(pos.first-1,pos.second);
+    }
+    if (command == "s" && map[pos.first+1][pos.second]!= DOOR && map[pos.first+1][pos.second]!=HIDE_POWER2 && map[pos.first+1][pos.second]!=HIDE_POWER4 &&map[pos.first+1][pos.second]!=HIDE_KEY && map[pos.first+1][pos.second]!= WALL2){
+        pos = make_pair(pos.first+1,pos.second);
+    }
+    if (command == "a" && map[pos.first][pos.second-1]!= DOOR && map[pos.first][pos.second-1]!=HIDE_POWER2 && map[pos.first][pos.second-1]!=HIDE_POWER4 &&map[pos.first][pos.second-1]!=HIDE_KEY && map[pos.first][pos.second-1]!=WALL2){
+        pos = make_pair(pos.first, pos.second-1);
+    }
+    if (command == "d" &&map[pos.first][pos.second+1]!= DOOR && map[pos.first][pos.second+1]!=HIDE_POWER2 && map[pos.first][pos.second+1]!=HIDE_POWER4 &&map[pos.first][pos.second+1]!=HIDE_KEY && map[pos.first][pos.second+1]!=WALL2){
+        pos = make_pair(pos.first, pos.second+1);
+    }
+}
 class Game{
 public:
     Game();
     void init_game();
     VVS get_map(){return board.get_map();}
+    pair<int,int> get_agent_pos(){return agent.get_pos();}
     void turn();
 
 private:
@@ -194,19 +215,23 @@ void Game::turn(){
     while(1)
     {
 
-        if(time(0)-start==10)
+        string input;
+        cout<<"get command";
+        cin>>input;
+        agent.make_move(input, board.get_map());
+        if(time(0)-start>=1)
         {
-        board.update_enemy();
-        cout<<"--------------------------"<<endl;
-        show_map(board.get_map());
-        start=start+10;
+            board.update_enemy();
+            cout<<"-------------------------"<<endl;
+            show_map(board.get_map(), agent.get_pos());
+            start=start+1;
         }
     }
 
 }
 int main(){
     Game game;
-    show_map(game.get_map());
+    show_map(game.get_map(),game.get_agent_pos());
     game.turn();
     return 0;
 }
