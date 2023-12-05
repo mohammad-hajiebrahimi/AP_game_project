@@ -1,4 +1,10 @@
 #include <bits/stdc++.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <stdbool.h>
+#include <unistd.h>
+
 using namespace std;
 
 #define sep ' '
@@ -13,6 +19,10 @@ const string DOOR = "D";
 const string HIDE_KEY = "K";
 const string HIDE_POWER2 = "L";
 const string HIDE_POWER4 = "S";
+const string SHOW_DOOR = "d";
+const string SHOW_KEY = "k";
+const string SHOW_POWER2 = "l";
+const string SHOW_POWER4 = "s";
 const string AGENT = "A";
 const string H_ENEMY = "H";
 const string V_ENEMY = "V";
@@ -21,8 +31,28 @@ const string V_ENEMYUP = "VU";
 const string H_ENEMYLEFT = "HL";
 const string H_ENEMYRIGHT = "HR";
 const string EMPTY = "-";
+const string BOMB = "T";
 
 typedef vector < vector < string >>    VVS;
+
+int kbhit(void) {
+    static bool initflag = false;
+    static const int STDIN = 0;
+
+    if (!initflag) {
+        // Use termios to turn off line buffering
+        struct termios term;
+        tcgetattr(STDIN, &term);
+        term.c_lflag &= ~ICANON;
+        tcsetattr(STDIN, TCSANOW, &term);
+        setbuf(stdin, NULL);
+        initflag = true;
+    }
+
+    int nbbytes;
+    ioctl(STDIN, FIONREAD, &nbbytes);  // 0 is STDIN
+    return nbbytes;
+}
 
 VVS read_record(string fname) {
     VVS content;
@@ -79,12 +109,25 @@ public:
     pair<int,int> get_pos(){return pos;}
     void set_pos(pair<int,int> pos1){pos = pos1;}
     void make_move(string command, VVS map);
+    void plant_bomb();
+    vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
+    VVS fire_bomb(VVS map);
+
 private:
     pair<int , int> pos;
+    int cnt_keys;
+    pair<int , int> door;
+    vector<pair<pair<int , int>,time_t>> cnt_bomb;
+    int life;
+    int speed;
 };
 
 void Agent::init_agent(){
-    pos = make_pair(2,1);
+    pos = make_pair(1,1);
+    cnt_keys=0;
+    door = make_pair(-1,-1);
+    life = 2;
+    speed = 1;
 }
 Agent::Agent(){
     init_agent();
@@ -120,9 +163,15 @@ VVS init_keys_power(VVS map){
     }
     return map;
 }
-void show_map(VVS map, pair<int,int> pos){
+void show_map(VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
+    time_t st = time(0);
     for(int i=0;i<map.size();i++){
         for (int j=0;j<map[i].size();j++){
+            for (int k=0;k<cnt_bomb.size();k++){
+                if(i==cnt_bomb[k].first.first && j==cnt_bomb[k].first.second &&st-cnt_bomb[k].second<=2){
+                    cout<<BOMB<<CSV_DELIMITER;
+                }
+            }
             if (i==pos.first && j==pos.second){
                 cout<<AGENT<<CSV_DELIMITER;
             }
@@ -188,6 +237,50 @@ void Agent::make_move(string command, VVS map){
         pos = make_pair(pos.first, pos.second+1);
     }
 }
+void Agent::plant_bomb(){
+    if (cnt_bomb.size()<3){
+        cnt_bomb.push_back(make_pair(pos,time(0)));
+    }
+}
+
+VVS Agent::fire_bomb(VVS map){
+    time_t startt=time(0);
+
+    for(int i=0;i<cnt_bomb.size();i++){
+        if (startt - cnt_bomb[i].second==2){
+            int row = cnt_bomb[i].first.first;
+            int col = cnt_bomb[i].first.second;
+            if (map[row][col-1]==HIDE_KEY || map[row][col-1] == HIDE_POWER2 || map[row][col-1]==HIDE_POWER4||map[row][col-1]==DOOR ||map[row][col-1]==WALL1){
+                transform(all(map[row][col-1]), map[row][col-1].begin(), ::tolower);
+            }
+            if (map[row][col+1]==HIDE_KEY || map[row][col+1] == HIDE_POWER2 || map[row][col+1]==HIDE_POWER4||map[row][col+1]==DOOR || map[row][col+1]==WALL1){
+                transform(all(map[row][col+1]), map[row][col+1].begin(), ::tolower);
+            }
+            if (map[row-1][col]==HIDE_KEY || map[row-1][col] == HIDE_POWER2 || map[row-1][col]==HIDE_POWER4||map[row-1][col]==DOOR || map[row-1][col]==WALL1){
+                transform(all(map[row-1][col]), map[row-1][col].begin(), ::tolower);
+            }
+            if (map[row+1][col]==HIDE_KEY || map[row+1][col] == HIDE_POWER2 || map[row+1][col]==HIDE_POWER4||map[row+1][col]==DOOR || map[row+1][col]==WALL1){
+                transform(all(map[row+1][col]), map[row+1][col].begin(), ::tolower);
+            }
+            if ((row-1 == pos.first && col == pos.second) || (row+1 == pos.first && col == pos.second) ||(row == pos.first && col-1 == pos.second)||(row == pos.first && col+1 == pos.second)){
+                life-=1;
+            }
+            if(map[row][col-1]==V_ENEMYUP || map[row][col-1] == V_ENEMYDOWN || map[row][col-1]==H_ENEMYLEFT||map[row][col-1]==H_ENEMYRIGHT){
+                map[row][col-1] = EMPTY;
+            }
+            if(map[row][col+1]==V_ENEMYUP || map[row][col+1] == V_ENEMYDOWN || map[row][col+1]==H_ENEMYLEFT||map[row][col+1]==H_ENEMYRIGHT){
+                map[row][col+1] = EMPTY;
+            }
+            if(map[row-1][col]==V_ENEMYUP || map[row-1][col] == V_ENEMYDOWN || map[row-1][col]==H_ENEMYLEFT||map[row-1][col]==H_ENEMYRIGHT){
+                map[row-1][col] = EMPTY;
+            }
+            if(map[row+1][col]==V_ENEMYUP || map[row+1][col] == V_ENEMYDOWN || map[row+1][col]==H_ENEMYLEFT||map[row+1][col]==H_ENEMYRIGHT){
+                map[row+1][col] = EMPTY;
+            }
+        }
+    }
+    return map;
+}
 class Game{
 public:
     Game();
@@ -210,20 +303,27 @@ void Game::init_game(){
     cout<<"game start"<<endl;
 }
 void Game::turn(){
-    time_t start;
+    time_t start,gametime;
     start=time(0);
-    while(1)
+    gametime = time(0);
+    while(time(0)-gametime<=read_game_time(MAP_PATH))
     {
-
-        string input;
-        cout<<"get command";
-        cin>>input;
-        agent.make_move(input, board.get_map());
-        if(time(0)-start>=1)
+        board.set_map(agent.fire_bomb(board.get_map()));
+        if (kbhit()){
+            char c;
+            c = getchar();
+            string input="";
+            input+=c;
+            if (input == "b"){
+                agent.plant_bomb();
+            }
+            agent.make_move(input, board.get_map());
+        }
+        if(time(0)-start==1)
         {
             board.update_enemy();
             cout<<"-------------------------"<<endl;
-            show_map(board.get_map(), agent.get_pos());
+            show_map(board.get_map(), agent.get_pos(), agent.get_cnt_bomb());
             start=start+1;
         }
     }
@@ -231,7 +331,6 @@ void Game::turn(){
 }
 int main(){
     Game game;
-    show_map(game.get_map(),game.get_agent_pos());
     game.turn();
     return 0;
 }
