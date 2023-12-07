@@ -32,9 +32,7 @@ const string H_ENEMYLEFT = "HL";
 const string H_ENEMYRIGHT = "HR";
 const string EMPTY = "-";
 const string BOMB = "T";
-
 typedef vector < vector < string >>    VVS;
-
 int kbhit(void) {
     static bool initflag = false;
     static const int STDIN = 0;
@@ -52,7 +50,6 @@ int kbhit(void) {
     ioctl(STDIN, FIONREAD, &nbbytes);
     return nbbytes;
 }
-
 VVS read_record(string fname) {
     VVS content;
     vector < string > row;
@@ -87,7 +84,6 @@ int read_game_time(string fname){
     int game_time = stoi(line);
     return game_time;
 }
-
 class Map{
 public:
     Map();
@@ -100,7 +96,6 @@ private:
     VVS map;
     int game_time;
 };
-
 class Agent{
 public:
     Agent();
@@ -117,7 +112,6 @@ public:
     VVS fire_bomb(VVS map);
     VVS collect(VVS map);
     void jiz_from_enemy(VVS map);
-
 private:
     pair<int , int> pos;
     int cnt_keys;
@@ -126,7 +120,6 @@ private:
     vector<pair<pair<int , int>,time_t>> cnt_bomb;
     int life;
 };
-
 void Agent::init_agent(){
     pos = make_pair(1,1);
     cnt_keys=0;
@@ -271,7 +264,6 @@ VVS Agent::fire_bomb(VVS map){
             }
             if ((row-1 == pos.first && col == pos.second) || (row+1 == pos.first && col == pos.second) ||(row == pos.first && col-1 == pos.second)||(row == pos.first && col+1 == pos.second) ||(row == pos.first && col == pos.second)){
                 life-=1;
-                cout<<"jis\n";
             }
             if(map[row][col-1]==V_ENEMYUP || map[row][col-1] == V_ENEMYDOWN || map[row][col-1]==H_ENEMYLEFT||map[row][col-1]==H_ENEMYRIGHT){
                 map[row][col-1] = EMPTY;
@@ -312,7 +304,6 @@ VVS Agent::collect(VVS map){
 void Agent::jiz_from_enemy(VVS map){
     if(map[pos.first][pos.second] == V_ENEMYUP || map[pos.first][pos.second] == V_ENEMYDOWN || map[pos.first][pos.second] == H_ENEMYLEFT || map[pos.first][pos.second] == H_ENEMYRIGHT){
         life-=1;
-        cout<<"jiz\n";
     }
 }
 class Game{
@@ -324,7 +315,6 @@ public:
     bool check_win(int cnt_keys, pair<int,int> door,pair<int,int>agent_pos);
     bool check_lose(int life);
     void turn();
-
 private:
     Map board;
     Agent agent;
@@ -333,7 +323,6 @@ private:
 Game::Game(){
     init_game();
 }
-
 void Game::init_game(){
     end_game = 0;
     cout<<"game start"<<endl;
@@ -389,7 +378,6 @@ void Game::turn(){
     else{
         cout<<"You lose\n";
     }
-
 }
 int main(){
     Game game;
