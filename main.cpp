@@ -44,6 +44,7 @@ const string KEY_IMAGE = "key.png";
 const string POWER2_IMAGE = "powerup2.jpeg";
 const string POWER3_IMAGE = "powerup3.jpeg";
 const string DOOR_IMAGE = "door.jpeg";
+const string BOMB_IMAGE = "bomb.png";
 typedef vector < vector < string >>    VVS;
 int kbhit(void) {
     static bool initflag = false;
@@ -355,9 +356,9 @@ bool Game::check_lose(int life){
 void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
     int row = map.size();
     int col = map[0].size();
-    sf::Texture empty_texture,textures[row][col];
-    sf::Sprite empty_sprite,sprites[row][col];
-    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image,key_image,power2_image,power3_image,door_image;
+    sf::Texture empty_texture,bomb_texture,textures[row][col];
+    sf::Sprite empty_sprite,bomb_sprite,sprites[row][col];
+    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image,key_image,power2_image,power3_image,door_image,bomb_image;
     if (!(grass_image.loadFromFile(GRASS_IMAGE))) cout << "Cannot load image";
     if (!(wall2_image.loadFromFile(WALL2_IMAGE))) cout << "Cannot load image";
     if (!(v_enemyup_image.loadFromFile(V_ENEMYUP_IMAGE))) cout << "Cannot load image";
@@ -369,7 +370,9 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     if (!(power2_image.loadFromFile(POWER2_IMAGE))) cout << "Cannot load image";
     if (!(power3_image.loadFromFile(POWER3_IMAGE))) cout << "Cannot load image";
     if (!(door_image.loadFromFile(DOOR_IMAGE))) cout << "Cannot load image";
+    if (!(bomb_image.loadFromFile(BOMB_IMAGE))) cout << "Cannot load image";
     empty_texture.loadFromImage(grass_image);
+    bomb_texture.loadFromImage(bomb_image);
     for (int i=0;i<row;i++){
         for (int j=0;j<col;j++){
             if(map[i][j]==WALL2){
@@ -410,6 +413,14 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
             window.draw(sprites[i][j]);
         }
     }
+    for (int i=0;i<cnt_bomb.size();i++){
+        if (time(0)-cnt_bomb[i].second<=2){
+            bomb_sprite.setTexture(bomb_texture);
+            bomb_sprite.setPosition(cnt_bomb[i].first.second*50,cnt_bomb[i].first.first*50);
+            window.draw(bomb_sprite);
+        }
+    }
+
 }
 void Game::turn(){
     sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "BOZGHALE");
