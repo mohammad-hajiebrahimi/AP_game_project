@@ -269,8 +269,9 @@ VVS Agent::fire_bomb(VVS map){
             if (map[row+1][col]==HIDE_KEY || map[row+1][col] == HIDE_POWER2 || map[row+1][col]==HIDE_POWER3||map[row+1][col]==DOOR || map[row+1][col]==WALL1){
                 transform(all(map[row+1][col]), map[row+1][col].begin(), ::tolower);
             }
-            if ((row-1 == pos.first && col == pos.second) || (row+1 == pos.first && col == pos.second) ||(row == pos.first && col-1 == pos.second)||(row == pos.first && col+1 == pos.second)){
+            if ((row-1 == pos.first && col == pos.second) || (row+1 == pos.first && col == pos.second) ||(row == pos.first && col-1 == pos.second)||(row == pos.first && col+1 == pos.second) ||(row == pos.first && col == pos.second)){
                 life-=1;
+                cout<<"jis\n";
             }
             if(map[row][col-1]==V_ENEMYUP || map[row][col-1] == V_ENEMYDOWN || map[row][col-1]==H_ENEMYLEFT||map[row][col-1]==H_ENEMYRIGHT){
                 map[row][col-1] = EMPTY;
