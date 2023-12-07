@@ -110,6 +110,7 @@ public:
     int get_cnt_keys(){return cnt_keys;}
     pair<int ,int> get_door(){return door;}
     int get_life(){return life;}
+    pair<bool,time_t> get_power3(){return has_power3;}
     void make_move(string command, VVS map);
     void plant_bomb();
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
@@ -370,7 +371,12 @@ void Game::turn(){
         board.set_map(agent.collect(board.get_map()));
         if(time(0)-start==1)
         {
-            board.update_enemy();
+            if (!agent.get_power3().first){
+                board.update_enemy();
+            }
+            else if(agent.get_power3().first && time(0)-agent.get_power3().second>=10){
+                board.update_enemy();
+            }
             board.set_map(agent.fire_bomb(board.get_map()));
             agent.jiz_from_enemy(board.get_map());
             cout<<"-------------------------"<<endl;
