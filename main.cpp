@@ -117,18 +117,17 @@ private:
     pair<int , int> pos;
     int cnt_keys;
     pair<int , int> door;
-    bool has_power3;
+    pair<bool,time_t> has_power3;
     vector<pair<pair<int , int>,time_t>> cnt_bomb;
     int life;
-    int speed;
 };
 
 void Agent::init_agent(){
     pos = make_pair(1,1);
     cnt_keys=0;
+    has_power3 = make_pair(false,time(0));
     door = make_pair(-1,-1);
     life = 2;
-    speed = 1;
 }
 Agent::Agent(){
     init_agent();
@@ -245,11 +244,6 @@ void Agent::plant_bomb(){
     if(count_bomb<3){
         cnt_bomb.push_back(make_pair(pos,time(0)));
     }
-
-    /*
-    if (cnt_bomb.size()<3){
-        cnt_bomb.push_back(make_pair(pos,time(0)));
-    }*/
 }
 VVS Agent::fire_bomb(VVS map){
     time_t startt=time(0);
@@ -304,7 +298,7 @@ VVS Agent::collect(VVS map){
         map[pos.first][pos.second] = EMPTY;
     }
     if (map[pos.first][pos.second]==SHOW_POWER3){
-        has_power3 = true;
+        has_power3 = make_pair(true, time(0));
         map[pos.first][pos.second] = EMPTY;
     }
     return map;
@@ -348,7 +342,7 @@ void Game::turn(){
             agent.make_move(input, board.get_map());
         }
         board.set_map(agent.collect(board.get_map()));
-        if(time(0)-start==1)
+        if(time(0)-start==2)
         {
             board.update_enemy();
             cout<<"-------------------------"<<endl;
