@@ -111,7 +111,7 @@ public:
     void plant_bomb();
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
     VVS fire_bomb(VVS map);
-    VVS colect(VVS map);
+    VVS collect(VVS map);
 
 private:
     pair<int , int> pos;
@@ -235,9 +235,21 @@ void Agent::make_move(string command, VVS map){
     }
 }
 void Agent::plant_bomb(){
-    if (cnt_bomb.size()<3){
+    int count_bomb = 0;
+    time_t start_count=time(0);
+    for (int i=0;i<cnt_bomb.size();i++){
+        if (start_count - cnt_bomb[i].second <=2){
+            count_bomb++;
+        }
+    }
+    if(count_bomb<3){
         cnt_bomb.push_back(make_pair(pos,time(0)));
     }
+
+    /*
+    if (cnt_bomb.size()<3){
+        cnt_bomb.push_back(make_pair(pos,time(0)));
+    }*/
 }
 VVS Agent::fire_bomb(VVS map){
     time_t startt=time(0);
@@ -277,7 +289,7 @@ VVS Agent::fire_bomb(VVS map){
     }
     return map;
 }
-VVS Agent::colect(VVS map){
+VVS Agent::collect(VVS map){
     if (map[pos.first][pos.second]==SHOW_DOOR){
         door = pos;
     }
@@ -335,7 +347,7 @@ void Game::turn(){
             }
             agent.make_move(input, board.get_map());
         }
-        board.set_map(agent.colect(board.get_map()));
+        board.set_map(agent.collect(board.get_map()));
         if(time(0)-start==1)
         {
             board.update_enemy();
