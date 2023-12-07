@@ -40,6 +40,9 @@ const string V_ENEMYUP_IMAGE = "up-enemy.png";
 const string V_ENEMYDOWN_IMAGE = "down-enemy.png";
 const string H_ENEMYLEFT_IMAGE = "left-enemy.png";
 const string H_ENEMYRIGHT_IMAGE = "right-enemy.png";
+const string KEY_IMAGE = "key.png";
+const string POWER2_IMAGE = "powerup2.jpeg";
+const string POWER3_IMAGE = "powerup3.jpeg";
 typedef vector < vector < string >>    VVS;
 int kbhit(void) {
     static bool initflag = false;
@@ -348,12 +351,12 @@ bool Game::check_lose(int life){
     }
     return false;
 }
-void graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
+void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
     int row = map.size();
     int col = map[0].size();
-    sf::Texture textures[row][col];
-    sf::Sprite sprites[row][col];
-    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image;
+    sf::Texture empty_texture,textures[row][col];
+    sf::Sprite empty_sprite,sprites[row][col];
+    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image,key_image,power2_image,power3_image;
     if (!(grass_image.loadFromFile(GRASS_IMAGE))) cout << "Cannot load image";
     if (!(wall2_image.loadFromFile(WALL2_IMAGE))) cout << "Cannot load image";
     if (!(v_enemyup_image.loadFromFile(V_ENEMYUP_IMAGE))) cout << "Cannot load image";
@@ -361,12 +364,13 @@ void graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair<pai
     if (!(h_enemyleft_image.loadFromFile(H_ENEMYLEFT_IMAGE))) cout << "Cannot load image";
     if (!(h_enemyright_image.loadFromFile(H_ENEMYRIGHT_IMAGE))) cout << "Cannot load image";
     if (!(wall1_image.loadFromFile(WALL1_IMAGE))) cout << "Cannot load image";
+    if (!(key_image.loadFromFile(KEY_IMAGE))) cout << "Cannot load image";
+    if (!(power2_image.loadFromFile(POWER2_IMAGE))) cout << "Cannot load image";
+    if (!(power3_image.loadFromFile(POWER3_IMAGE))) cout << "Cannot load image";
+    empty_texture.loadFromImage(grass_image);
     for (int i=0;i<row;i++){
         for (int j=0;j<col;j++){
-            if (map[i][j]==EMPTY){
-                textures[i][j].loadFromImage(grass_image);
-            }
-            else if(map[i][j]==WALL2){
+            if(map[i][j]==WALL2){
                 textures[i][j].loadFromImage(wall2_image);
             }
             else if(map[i][j]==V_ENEMYUP){
@@ -384,14 +388,26 @@ void graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair<pai
             else if(map[i][j]==WALL1 || map[i][j]==HIDE_KEY || map[i][j]==HIDE_POWER2 || map[i][j]==HIDE_POWER3 || map[i][j]== DOOR){
                 textures[i][j].loadFromImage(wall1_image);
             }
+            else if(map[i][j]==SHOW_KEY){
+                textures[i][j].loadFromImage(key_image);
+            }
+            else if(map[i][j]==SHOW_POWER2){
+                textures[i][j].loadFromImage(power2_image);
+            }
+            else if(map[i][j]==SHOW_POWER3){
+                textures[i][j].loadFromImage(power3_image);
+            }
+            empty_sprite.setTexture(empty_texture);
+            empty_sprite.setPosition(j*50,i*50);
             sprites[i][j].setTexture(textures[i][j]);
             sprites[i][j].setPosition(j*50,i*50);
+            window.draw(empty_sprite);
             window.draw(sprites[i][j]);
         }
     }
 }
 void Game::turn(){
-    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "BABAII");
     time_t start,gametime;
     start=time(0);
     gametime = time(0);
@@ -405,7 +421,7 @@ void Game::turn(){
         }
 
         window.clear();
-        graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
+        map_graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
         window.display();
         if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()) || check_lose(agent.get_life())){
             break;
