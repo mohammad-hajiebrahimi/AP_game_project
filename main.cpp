@@ -18,11 +18,11 @@ const string WALL2 = "P";
 const string DOOR = "D";
 const string HIDE_KEY = "K";
 const string HIDE_POWER2 = "L";
-const string HIDE_POWER4 = "S";
+const string HIDE_POWER3 = "S";
 const string SHOW_DOOR = "d";
 const string SHOW_KEY = "k";
 const string SHOW_POWER2 = "l";
-const string SHOW_POWER4 = "s";
+const string SHOW_POWER3 = "s";
 const string AGENT = "A";
 const string H_ENEMY = "H";
 const string V_ENEMY = "V";
@@ -40,7 +40,6 @@ int kbhit(void) {
     static const int STDIN = 0;
 
     if (!initflag) {
-        // Use termios to turn off line buffering
         struct termios term;
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
@@ -50,7 +49,7 @@ int kbhit(void) {
     }
 
     int nbbytes;
-    ioctl(STDIN, FIONREAD, &nbbytes);  // 0 is STDIN
+    ioctl(STDIN, FIONREAD, &nbbytes);
     return nbbytes;
 }
 
@@ -112,11 +111,13 @@ public:
     void plant_bomb();
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
     VVS fire_bomb(VVS map);
+    VVS colect(VVS map);
 
 private:
     pair<int , int> pos;
     int cnt_keys;
     pair<int , int> door;
+    bool has_power3;
     vector<pair<pair<int , int>,time_t>> cnt_bomb;
     int life;
     int speed;
@@ -155,12 +156,8 @@ VVS init_keys_power(VVS map){
     for(int i=0;i<3;i++){
         map[wall_count[random_nums[i]].first][wall_count[random_nums[i]].second] = HIDE_KEY;
     }
-    for (int i = 3;i<3+int((wall_count.size()-3)/2);i++){
-        map[wall_count[random_nums[i]].first][wall_count[random_nums[i]].second] = HIDE_POWER2;
-    }
-    for (int i = 3+int((wall_count.size()-3)/2);i<wall_count.size();i++){
-        map[wall_count[random_nums[i]].first][wall_count[random_nums[i]].second] = HIDE_POWER4;
-    }
+    map[wall_count[random_nums[3]].first][wall_count[random_nums[3]].second] = HIDE_POWER2;
+    map[wall_count[random_nums[4]].first][wall_count[random_nums[4]].second] = HIDE_POWER3;
     return map;
 }
 void show_map(VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
@@ -224,16 +221,16 @@ void Map::update_enemy(){
     map = map1;
 }
 void Agent::make_move(string command, VVS map){
-    if (command == "w" && map[pos.first-1][pos.second]!= DOOR && map[pos.first-1][pos.second]!=HIDE_POWER2 && map[pos.first-1][pos.second]!=HIDE_POWER4 &&map[pos.first-1][pos.second]!=HIDE_KEY && map[pos.first-1][pos.second]!= WALL2){
+    if (command == "w" && map[pos.first-1][pos.second]!= DOOR && map[pos.first-1][pos.second]!=HIDE_POWER2 && map[pos.first-1][pos.second]!=HIDE_POWER3 &&map[pos.first-1][pos.second]!=HIDE_KEY && map[pos.first-1][pos.second]!= WALL2 && map[pos.first-1][pos.second]!= WALL1){
         pos = make_pair(pos.first-1,pos.second);
     }
-    if (command == "s" && map[pos.first+1][pos.second]!= DOOR && map[pos.first+1][pos.second]!=HIDE_POWER2 && map[pos.first+1][pos.second]!=HIDE_POWER4 &&map[pos.first+1][pos.second]!=HIDE_KEY && map[pos.first+1][pos.second]!= WALL2){
+    if (command == "s" && map[pos.first+1][pos.second]!= DOOR && map[pos.first+1][pos.second]!=HIDE_POWER2 && map[pos.first+1][pos.second]!=HIDE_POWER3 &&map[pos.first+1][pos.second]!=HIDE_KEY && map[pos.first+1][pos.second]!= WALL2 && map[pos.first+1][pos.second]!= WALL1){
         pos = make_pair(pos.first+1,pos.second);
     }
-    if (command == "a" && map[pos.first][pos.second-1]!= DOOR && map[pos.first][pos.second-1]!=HIDE_POWER2 && map[pos.first][pos.second-1]!=HIDE_POWER4 &&map[pos.first][pos.second-1]!=HIDE_KEY && map[pos.first][pos.second-1]!=WALL2){
+    if (command == "a" && map[pos.first][pos.second-1]!= DOOR && map[pos.first][pos.second-1]!=HIDE_POWER2 && map[pos.first][pos.second-1]!=HIDE_POWER3 &&map[pos.first][pos.second-1]!=HIDE_KEY && map[pos.first][pos.second-1]!=WALL2 && map[pos.first][pos.second-1]!=WALL1){
         pos = make_pair(pos.first, pos.second-1);
     }
-    if (command == "d" &&map[pos.first][pos.second+1]!= DOOR && map[pos.first][pos.second+1]!=HIDE_POWER2 && map[pos.first][pos.second+1]!=HIDE_POWER4 &&map[pos.first][pos.second+1]!=HIDE_KEY && map[pos.first][pos.second+1]!=WALL2){
+    if (command == "d" &&map[pos.first][pos.second+1]!= DOOR && map[pos.first][pos.second+1]!=HIDE_POWER2 && map[pos.first][pos.second+1]!=HIDE_POWER3 &&map[pos.first][pos.second+1]!=HIDE_KEY && map[pos.first][pos.second+1]!=WALL2 && map[pos.first][pos.second+1]!=WALL1){
         pos = make_pair(pos.first, pos.second+1);
     }
 }
@@ -242,7 +239,6 @@ void Agent::plant_bomb(){
         cnt_bomb.push_back(make_pair(pos,time(0)));
     }
 }
-
 VVS Agent::fire_bomb(VVS map){
     time_t startt=time(0);
 
@@ -250,16 +246,16 @@ VVS Agent::fire_bomb(VVS map){
         if (startt - cnt_bomb[i].second==2){
             int row = cnt_bomb[i].first.first;
             int col = cnt_bomb[i].first.second;
-            if (map[row][col-1]==HIDE_KEY || map[row][col-1] == HIDE_POWER2 || map[row][col-1]==HIDE_POWER4||map[row][col-1]==DOOR ||map[row][col-1]==WALL1){
+            if (map[row][col-1]==HIDE_KEY || map[row][col-1] == HIDE_POWER2 || map[row][col-1]==HIDE_POWER3||map[row][col-1]==DOOR ||map[row][col-1]==WALL1){
                 transform(all(map[row][col-1]), map[row][col-1].begin(), ::tolower);
             }
-            if (map[row][col+1]==HIDE_KEY || map[row][col+1] == HIDE_POWER2 || map[row][col+1]==HIDE_POWER4||map[row][col+1]==DOOR || map[row][col+1]==WALL1){
+            if (map[row][col+1]==HIDE_KEY || map[row][col+1] == HIDE_POWER2 || map[row][col+1]==HIDE_POWER3||map[row][col+1]==DOOR || map[row][col+1]==WALL1){
                 transform(all(map[row][col+1]), map[row][col+1].begin(), ::tolower);
             }
-            if (map[row-1][col]==HIDE_KEY || map[row-1][col] == HIDE_POWER2 || map[row-1][col]==HIDE_POWER4||map[row-1][col]==DOOR || map[row-1][col]==WALL1){
+            if (map[row-1][col]==HIDE_KEY || map[row-1][col] == HIDE_POWER2 || map[row-1][col]==HIDE_POWER3||map[row-1][col]==DOOR || map[row-1][col]==WALL1){
                 transform(all(map[row-1][col]), map[row-1][col].begin(), ::tolower);
             }
-            if (map[row+1][col]==HIDE_KEY || map[row+1][col] == HIDE_POWER2 || map[row+1][col]==HIDE_POWER4||map[row+1][col]==DOOR || map[row+1][col]==WALL1){
+            if (map[row+1][col]==HIDE_KEY || map[row+1][col] == HIDE_POWER2 || map[row+1][col]==HIDE_POWER3||map[row+1][col]==DOOR || map[row+1][col]==WALL1){
                 transform(all(map[row+1][col]), map[row+1][col].begin(), ::tolower);
             }
             if ((row-1 == pos.first && col == pos.second) || (row+1 == pos.first && col == pos.second) ||(row == pos.first && col-1 == pos.second)||(row == pos.first && col+1 == pos.second)){
@@ -278,6 +274,26 @@ VVS Agent::fire_bomb(VVS map){
                 map[row+1][col] = EMPTY;
             }
         }
+    }
+    return map;
+}
+VVS Agent::colect(VVS map){
+    if (map[pos.first][pos.second]==SHOW_DOOR){
+        door = pos;
+    }
+    if (map[pos.first][pos.second]==SHOW_KEY){
+        cnt_keys++;
+        map[pos.first][pos.second] = EMPTY;
+    }
+    if (map[pos.first][pos.second]==SHOW_POWER2){
+        if (life<3){
+            life+=1;
+        }
+        map[pos.first][pos.second] = EMPTY;
+    }
+    if (map[pos.first][pos.second]==SHOW_POWER3){
+        has_power3 = true;
+        map[pos.first][pos.second] = EMPTY;
     }
     return map;
 }
@@ -319,6 +335,7 @@ void Game::turn(){
             }
             agent.make_move(input, board.get_map());
         }
+        board.set_map(agent.colect(board.get_map()));
         if(time(0)-start==1)
         {
             board.update_enemy();
