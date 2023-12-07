@@ -46,6 +46,10 @@ const string POWER2_IMAGE = "powerup2.jpeg";
 const string POWER3_IMAGE = "powerup3.jpeg";
 const string DOOR_IMAGE = "door.jpeg";
 const string BOMB_IMAGE = "bomb.png";
+const string AGENT_UP_IMAGE = "up.png";
+const string AGENT_DOWN_IMAGE = "down.png";
+const string AGENT_LEFT_IMAGE = "left.png";
+const string AGENT_RIGHT_IMAGE = "right.png";
 typedef vector < vector < string >>    VVS;
 int kbhit(void) {
     static bool initflag = false;
@@ -120,7 +124,7 @@ public:
     pair<int ,int> get_door(){return door;}
     int get_life(){return life;}
     pair<bool,time_t> get_power3(){return has_power3;}
-    void make_move(string command, VVS map);
+    bool make_move(string command, VVS map);
     void plant_bomb();
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
     VVS fire_bomb(VVS map);
@@ -231,19 +235,24 @@ void Map::update_enemy(){
     }
     map = map1;
 }
-void Agent::make_move(string command, VVS map){
+bool Agent::make_move(string command, VVS map){
     if (command == "w" && map[pos.first-1][pos.second]!= DOOR && map[pos.first-1][pos.second]!=HIDE_POWER2 && map[pos.first-1][pos.second]!=HIDE_POWER3 &&map[pos.first-1][pos.second]!=HIDE_KEY && map[pos.first-1][pos.second]!= WALL2 && map[pos.first-1][pos.second]!= WALL1){
-        pos = make_pair(pos.first-1,pos.second);
+        //pos = make_pair(pos.first-1,pos.second);
+        return true;
     }
     if (command == "s" && map[pos.first+1][pos.second]!= DOOR && map[pos.first+1][pos.second]!=HIDE_POWER2 && map[pos.first+1][pos.second]!=HIDE_POWER3 &&map[pos.first+1][pos.second]!=HIDE_KEY && map[pos.first+1][pos.second]!= WALL2 && map[pos.first+1][pos.second]!= WALL1){
-        pos = make_pair(pos.first+1,pos.second);
+        //pos = make_pair(pos.first+1,pos.second);
+        return true;
     }
     if (command == "a" && map[pos.first][pos.second-1]!= DOOR && map[pos.first][pos.second-1]!=HIDE_POWER2 && map[pos.first][pos.second-1]!=HIDE_POWER3 &&map[pos.first][pos.second-1]!=HIDE_KEY && map[pos.first][pos.second-1]!=WALL2 && map[pos.first][pos.second-1]!=WALL1){
-        pos = make_pair(pos.first, pos.second-1);
+        //pos = make_pair(pos.first, pos.second-1);
+        return true;
     }
     if (command == "d" &&map[pos.first][pos.second+1]!= DOOR && map[pos.first][pos.second+1]!=HIDE_POWER2 && map[pos.first][pos.second+1]!=HIDE_POWER3 &&map[pos.first][pos.second+1]!=HIDE_KEY && map[pos.first][pos.second+1]!=WALL2 && map[pos.first][pos.second+1]!=WALL1){
-        pos = make_pair(pos.first, pos.second+1);
+        //pos = make_pair(pos.first, pos.second+1);
+        return true;
     }
+    return false;
 }
 void Agent::plant_bomb(){
     int count_bomb = 0;
@@ -450,27 +459,72 @@ void winlose_graphic(sf::RenderWindow& window,string str){
     window.display();
     sf::sleep(sf::milliseconds(10000));
 }
+void agent_graphic(sf::RenderWindow& window,pair<int,int>pos,string dir){
+    sf::Image agent_up_image,agent_down_image,agent_left_image,agent_right_image;
+    if (!(agent_up_image.loadFromFile(AGENT_UP_IMAGE))) cout << "Cannot load image";
+    if (!(agent_down_image.loadFromFile(AGENT_DOWN_IMAGE))) cout << "Cannot load image";
+    if (!(agent_left_image.loadFromFile(AGENT_LEFT_IMAGE))) cout << "Cannot load image";
+    if (!(agent_right_image.loadFromFile(AGENT_RIGHT_IMAGE))) cout << "Cannot load image";
+
+    sf::Texture agent_texture;
+    sf::Sprite agent_sprite;
+    if (dir == "s")agent_texture.loadFromImage(agent_down_image);
+    if (dir == "w")agent_texture.loadFromImage(agent_up_image);
+    if (dir == "a")agent_texture.loadFromImage(agent_left_image);
+    if (dir == "d")agent_texture.loadFromImage(agent_right_image);
+    agent_sprite.setTexture(agent_texture);
+    agent_sprite.setPosition(pos.second,pos.first);
+    window.draw(agent_sprite);
+}
 void Game::turn(){
     sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()+50), "BOZGHALE");
     time_t start,gametime;
     start=time(0);
     gametime = time(0);
+    string dir = "w";
+    pair<int,int>agent_pos = make_pair(50,50);
     while(time(0)-gametime<=read_game_time(MAP_PATH) && window.isOpen())
     {
+        window.clear();
         sf::Event event;
         while (window.pollEvent(event))
         {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
+                if(agent.make_move("w", board.get_map())){
+                    dir ="w";
+                    agent_pos.first-=2;
+                }
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+                if(agent.make_move("s", board.get_map())){
+                    dir = "s";
+                    agent_pos.first+=2;
+                }
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
+                if(agent.make_move("a", board.get_map())){
+                    dir = "a";
+                    agent_pos.second-=2;
+                }
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
+                if(agent.make_move("d", board.get_map())){
+                    dir = "d";
+                    agent_pos.second+=2;
+                }
+            }
             if (event.type == sf::Event::Closed)
                 window.close();
         }
 
-        window.clear();
+        agent.set_pos(make_pair((int)(agent_pos.first/50),(int)(agent_pos.second/50)));
         map_graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
         text_graphic(window, agent.get_life(), time(0)-gametime, board.get_map().size(),board.get_map()[0].size());
-        window.display();
+        agent_graphic(window,agent_pos,dir);
         if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()) || check_lose(agent.get_life())){
             break;
         }
+
         if (kbhit()){
             char c;
             c = getchar();
@@ -479,8 +533,10 @@ void Game::turn(){
             if (input == "b"){
                 agent.plant_bomb();
             }
+            //agent_graphic(window,agent.get_pos(),input);
             agent.make_move(input, board.get_map());
         }
+        window.display();
         board.set_map(agent.collect(board.get_map()));
         if(time(0)-start==1)
         {
