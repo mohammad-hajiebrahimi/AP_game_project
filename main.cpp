@@ -43,6 +43,7 @@ const string H_ENEMYRIGHT_IMAGE = "right-enemy.png";
 const string KEY_IMAGE = "key.png";
 const string POWER2_IMAGE = "powerup2.jpeg";
 const string POWER3_IMAGE = "powerup3.jpeg";
+const string DOOR_IMAGE = "door.jpeg";
 typedef vector < vector < string >>    VVS;
 int kbhit(void) {
     static bool initflag = false;
@@ -356,7 +357,7 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     int col = map[0].size();
     sf::Texture empty_texture,textures[row][col];
     sf::Sprite empty_sprite,sprites[row][col];
-    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image,key_image,power2_image,power3_image;
+    sf::Image grass_image,wall1_image,wall2_image,v_enemyup_image,v_enemydown_image,h_enemyleft_image,h_enemyright_image,key_image,power2_image,power3_image,door_image;
     if (!(grass_image.loadFromFile(GRASS_IMAGE))) cout << "Cannot load image";
     if (!(wall2_image.loadFromFile(WALL2_IMAGE))) cout << "Cannot load image";
     if (!(v_enemyup_image.loadFromFile(V_ENEMYUP_IMAGE))) cout << "Cannot load image";
@@ -367,6 +368,7 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     if (!(key_image.loadFromFile(KEY_IMAGE))) cout << "Cannot load image";
     if (!(power2_image.loadFromFile(POWER2_IMAGE))) cout << "Cannot load image";
     if (!(power3_image.loadFromFile(POWER3_IMAGE))) cout << "Cannot load image";
+    if (!(door_image.loadFromFile(DOOR_IMAGE))) cout << "Cannot load image";
     empty_texture.loadFromImage(grass_image);
     for (int i=0;i<row;i++){
         for (int j=0;j<col;j++){
@@ -397,6 +399,9 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
             else if(map[i][j]==SHOW_POWER3){
                 textures[i][j].loadFromImage(power3_image);
             }
+            else if(map[i][j]==SHOW_DOOR){
+                textures[i][j].loadFromImage(door_image);
+            }
             empty_sprite.setTexture(empty_texture);
             empty_sprite.setPosition(j*50,i*50);
             sprites[i][j].setTexture(textures[i][j]);
@@ -407,7 +412,7 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     }
 }
 void Game::turn(){
-    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "BABAII");
+    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "BOZGHALE");
     time_t start,gametime;
     start=time(0);
     gametime = time(0);
