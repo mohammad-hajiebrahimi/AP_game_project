@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <SFML/Graphics.hpp>
-
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 using namespace std;
 
 #define sep ' '
@@ -422,8 +423,35 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     }
 
 }
+void text_graphic(sf::RenderWindow& window, int life, time_t gametime,int row,int col){
+    sf::Font font;
+    font.loadFromFile("Arial.ttf");
+    sf::Text text;
+    text.setFont(font);
+    text.setString("life:" + to_string(life));
+    text.setCharacterSize(50);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(0, 50*row);
+    window.draw(text);
+    text.setString("time:" + to_string(gametime));
+    text.setPosition(150, 50*row);
+    window.draw(text);
+}
+void winlose_graphic(sf::RenderWindow& window,string str){
+    sf::Font font;
+    font.loadFromFile("Arial.ttf");
+    sf::Text text;
+    text.setFont(font);
+    text.setString(str);
+    text.setCharacterSize(100);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(200, 200);
+    window.draw(text);
+    window.display();
+    sf::sleep(sf::milliseconds(10000));
+}
 void Game::turn(){
-    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()), "BOZGHALE");
+    sf::RenderWindow window(sf::VideoMode(50*board.get_map()[0].size(), 50*board.get_map().size()+50), "BOZGHALE");
     time_t start,gametime;
     start=time(0);
     gametime = time(0);
@@ -438,6 +466,7 @@ void Game::turn(){
 
         window.clear();
         map_graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
+        text_graphic(window, agent.get_life(), time(0)-gametime, board.get_map().size(),board.get_map()[0].size());
         window.display();
         if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()) || check_lose(agent.get_life())){
             break;
@@ -468,9 +497,9 @@ void Game::turn(){
             start=start+1;
         }
     }
-    if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()))cout<<"You win\n";
+    if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()))winlose_graphic(window,"YOU WIN");
     else{
-        cout<<"You lose\n";
+        winlose_graphic(window,"YOU LOSE");
     }
 }
 
