@@ -107,6 +107,9 @@ public:
     void init_agent();
     pair<int,int> get_pos(){return pos;}
     void set_pos(pair<int,int> pos1){pos = pos1;}
+    int get_cnt_keys(){return cnt_keys;}
+    pair<int ,int> get_door(){return door;}
+    int get_life(){return life;}
     void make_move(string command, VVS map);
     void plant_bomb();
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
@@ -316,6 +319,8 @@ public:
     void init_game();
     VVS get_map(){return board.get_map();}
     pair<int,int> get_agent_pos(){return agent.get_pos();}
+    bool check_win(int cnt_keys, pair<int,int> door,pair<int,int>agent_pos);
+    bool check_lose(int life);
     void turn();
 
 private:
@@ -331,13 +336,27 @@ void Game::init_game(){
     end_game = 0;
     cout<<"game start"<<endl;
 }
+bool Game::check_win(int cnt_keys, pair<int,int> door,pair<int,int>agent_pos){
+    if (cnt_keys==3 && door==agent_pos){
+        return true;
+    }
+    return false;
+}
+bool Game::check_lose(int life){
+    if (life<=0){
+        return true;
+    }
+    return false;
+}
 void Game::turn(){
     time_t start,gametime;
     start=time(0);
     gametime = time(0);
     while(time(0)-gametime<=read_game_time(MAP_PATH))
     {
-        board.set_map(agent.fire_bomb(board.get_map()));
+        if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()) || check_lose(agent.get_life())){
+            break;
+        }
         if (kbhit()){
             char c;
             c = getchar();
@@ -352,11 +371,16 @@ void Game::turn(){
         if(time(0)-start==1)
         {
             board.update_enemy();
+            board.set_map(agent.fire_bomb(board.get_map()));
             agent.jiz_from_enemy(board.get_map());
             cout<<"-------------------------"<<endl;
             show_map(board.get_map(), agent.get_pos(), agent.get_cnt_bomb());
             start=start+1;
         }
+    }
+    if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()))cout<<"You win\n";
+    else{
+        cout<<"You lose\n";
     }
 
 }
