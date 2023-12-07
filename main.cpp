@@ -112,6 +112,7 @@ public:
     vector<pair<pair<int , int>,time_t>> get_cnt_bomb(){return cnt_bomb;}
     VVS fire_bomb(VVS map);
     VVS collect(VVS map);
+    void jiz_from_enemy(VVS map);
 
 private:
     pair<int , int> pos;
@@ -303,6 +304,12 @@ VVS Agent::collect(VVS map){
     }
     return map;
 }
+void Agent::jiz_from_enemy(VVS map){
+    if(map[pos.first][pos.second] == V_ENEMYUP || map[pos.first][pos.second] == V_ENEMYDOWN || map[pos.first][pos.second] == H_ENEMYLEFT || map[pos.first][pos.second] == H_ENEMYRIGHT){
+        life-=1;
+        cout<<"jiz\n";
+    }
+}
 class Game{
 public:
     Game();
@@ -342,9 +349,10 @@ void Game::turn(){
             agent.make_move(input, board.get_map());
         }
         board.set_map(agent.collect(board.get_map()));
-        if(time(0)-start==2)
+        if(time(0)-start==1)
         {
             board.update_enemy();
+            agent.jiz_from_enemy(board.get_map());
             cout<<"-------------------------"<<endl;
             show_map(board.get_map(), agent.get_pos(), agent.get_cnt_bomb());
             start=start+1;
