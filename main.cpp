@@ -16,91 +16,16 @@
 
 #include <SFML/System.hpp>
 
-using namespace std;
+#include "magic.hh"
 
-#define sep ' '
-#define endl '\n'
-#define tab '\t'
-#define all(x)(x).begin(), (x).end()
-const string MAP_PATH = "map.txt";
-const char CSV_DELIMITER = ',';
-const string WALL1 = "B";
-const string WALL2 = "P";
-const string DOOR = "D";
-const string HIDE_KEY = "K";
-const string HIDE_POWER2 = "L";
-const string HIDE_POWER3 = "S";
-const string SHOW_DOOR = "d";
-const string SHOW_KEY = "k";
-const string SHOW_POWER2 = "l";
-const string SHOW_POWER3 = "s";
-const string AGENT = "A";
-const string H_ENEMY = "H";
-const string V_ENEMY = "V";
-const string V_ENEMYDOWN = "VD";
-const string V_ENEMYUP = "VU";
-const string H_ENEMYLEFT = "HL";
-const string H_ENEMYRIGHT = "HR";
-const string EMPTY = "-";
-const string BOMB = "T";
-const string GRASS_IMAGE = "Pic/grass.png";
-const string WALL1_IMAGE = "Pic/wall-1.png";
-const string WALL2_IMAGE = "Pic/wall-2.png";
-const string V_ENEMYUP_IMAGE = "Pic/up-enemy.png";
-const string V_ENEMYDOWN_IMAGE = "Pic/down-enemy.png";
-const string H_ENEMYLEFT_IMAGE = "Pic/left-enemy.png";
-const string H_ENEMYRIGHT_IMAGE = "Pic/right-enemy.png";
-const string KEY_IMAGE = "Pic/key.png";
-const string POWER2_IMAGE = "Pic/powerup2.jpeg";
-const string POWER3_IMAGE = "Pic/powerup3.jpeg";
-const string DOOR_IMAGE = "Pic/door.jpeg";
-const string BOMB_IMAGE = "Pic/bomb.png";
-const string AGENT_UP_IMAGE = "Pic/up.png";
-const string AGENT_DOWN_IMAGE = "Pic/down.png";
-const string AGENT_LEFT_IMAGE = "Pic/left.png";
-const string AGENT_RIGHT_IMAGE = "Pic/right.png";
-typedef vector < vector < string >> VVS;
+#include "readmap.hh"
 
-VVS read_record(string fname) {
-  VVS content;
-  vector < string > row;
-  string line, word;
-  srand(time(0));
-  fstream file(fname, ios::in);
-  if (file.is_open()) {
-    getline(file, line);
-    while (getline(file, line)) {
-      row.clear();
-      stringstream str(line);
-      while (getline(str, word, CSV_DELIMITER)) {
-        if (word == V_ENEMY) {
-          if (rand() % 2 == 0) {
-            word = V_ENEMYUP;
-          } else {
-            word = V_ENEMYDOWN;
-          }
-        }
-        if (word == H_ENEMY) {
-          if (rand() % 2 == 0) {
-            word = H_ENEMYLEFT;
-          } else {
-            word = H_ENEMYRIGHT;
-          }
-        }
-        row.push_back(word);
-      }
-      content.push_back(row);
-    }
-  }
-  return content;
-}
-int read_game_time(string fname) {
-  fstream file(fname, ios::in);
-  string line;
-  getline(file, line);
-  int game_time = stoi(line);
-  return game_time;
-}
+#include "agentgraphic.hh"
+
+#include "textgraphic.hh"
+
+#include "mapgraphic.hh"
+
 class Map {
   public: Map();
   void init_map();
@@ -364,113 +289,9 @@ bool Game::check_lose(int life) {
   }
   return false;
 }
-void map_graphic(sf::RenderWindow & window, VVS map, pair < int, int > pos, vector < pair < pair < int, int > , time_t >> cnt_bomb) {
-  int row = map.size();
-  int col = map[0].size();
-  sf::Texture empty_texture, bomb_texture, textures[row][col];
-  sf::Sprite empty_sprite, bomb_sprite, sprites[row][col];
-  sf::Image grass_image, wall1_image, wall2_image, v_enemyup_image, v_enemydown_image, h_enemyleft_image, h_enemyright_image, key_image, power2_image, power3_image, door_image, bomb_image;
-  if (!(grass_image.loadFromFile(GRASS_IMAGE))) cout << "Cannot load image";
-  if (!(wall2_image.loadFromFile(WALL2_IMAGE))) cout << "Cannot load image";
-  if (!(v_enemyup_image.loadFromFile(V_ENEMYUP_IMAGE))) cout << "Cannot load image";
-  if (!(v_enemydown_image.loadFromFile(V_ENEMYDOWN_IMAGE))) cout << "Cannot load image";
-  if (!(h_enemyleft_image.loadFromFile(H_ENEMYLEFT_IMAGE))) cout << "Cannot load image";
-  if (!(h_enemyright_image.loadFromFile(H_ENEMYRIGHT_IMAGE))) cout << "Cannot load image";
-  if (!(wall1_image.loadFromFile(WALL1_IMAGE))) cout << "Cannot load image";
-  if (!(key_image.loadFromFile(KEY_IMAGE))) cout << "Cannot load image";
-  if (!(power2_image.loadFromFile(POWER2_IMAGE))) cout << "Cannot load image";
-  if (!(power3_image.loadFromFile(POWER3_IMAGE))) cout << "Cannot load image";
-  if (!(door_image.loadFromFile(DOOR_IMAGE))) cout << "Cannot load image";
-  if (!(bomb_image.loadFromFile(BOMB_IMAGE))) cout << "Cannot load image";
-  empty_texture.loadFromImage(grass_image);
-  bomb_texture.loadFromImage(bomb_image);
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < col; j++) {
-      if (map[i][j] == WALL2) {
-        textures[i][j].loadFromImage(wall2_image);
-      } else if (map[i][j] == V_ENEMYUP) {
-        textures[i][j].loadFromImage(v_enemyup_image);
-      } else if (map[i][j] == V_ENEMYDOWN) {
-        textures[i][j].loadFromImage(v_enemydown_image);
-      } else if (map[i][j] == H_ENEMYLEFT) {
-        textures[i][j].loadFromImage(h_enemyleft_image);
-      } else if (map[i][j] == H_ENEMYRIGHT) {
-        textures[i][j].loadFromImage(h_enemyright_image);
-      } else if (map[i][j] == WALL1 || map[i][j] == HIDE_KEY || map[i][j] == HIDE_POWER2 || map[i][j] == HIDE_POWER3 || map[i][j] == DOOR) {
-        textures[i][j].loadFromImage(wall1_image);
-      } else if (map[i][j] == SHOW_KEY) {
-        textures[i][j].loadFromImage(key_image);
-      } else if (map[i][j] == SHOW_POWER2) {
-        textures[i][j].loadFromImage(power2_image);
-      } else if (map[i][j] == SHOW_POWER3) {
-        textures[i][j].loadFromImage(power3_image);
-      } else if (map[i][j] == SHOW_DOOR) {
-        textures[i][j].loadFromImage(door_image);
-      }
-      empty_sprite.setTexture(empty_texture);
-      empty_sprite.setPosition(j * 50, i * 50);
-      sprites[i][j].setTexture(textures[i][j]);
-      sprites[i][j].setPosition(j * 50, i * 50);
-      window.draw(empty_sprite);
-      window.draw(sprites[i][j]);
-    }
-  }
-  for (int i = 0; i < cnt_bomb.size(); i++) {
-    if (time(0) - cnt_bomb[i].second <= 2) {
-      bomb_sprite.setTexture(bomb_texture);
-      bomb_sprite.setPosition(cnt_bomb[i].first.second * 50, cnt_bomb[i].first.first * 50);
-      window.draw(bomb_sprite);
-    }
-  }
 
-}
-void text_graphic(sf::RenderWindow & window, int life, time_t gametime, int row, int col, int cnt_keys) {
-  sf::Font font;
-  font.loadFromFile("Pic/Arial.ttf");
-  sf::Text text;
-  text.setFont(font);
-  text.setString("life:" + to_string(life));
-  text.setCharacterSize(50);
-  text.setFillColor(sf::Color::White);
-  text.setPosition(0, 50 * row);
-  window.draw(text);
-  text.setString("time:" + to_string(gametime));
-  text.setPosition(150, 50 * row);
-  window.draw(text);
-  text.setString("keys:" + to_string(cnt_keys));
-  text.setPosition(350, 50 * row);
-  window.draw(text);
-}
-void winlose_graphic(sf::RenderWindow & window, string str) {
-  sf::Font font;
-  font.loadFromFile("Pic/Arial.ttf");
-  sf::Text text;
-  text.setFont(font);
-  text.setString(str);
-  text.setCharacterSize(100);
-  text.setFillColor(sf::Color::White);
-  text.setPosition(200, 200);
-  window.draw(text);
-  window.display();
-  sf::sleep(sf::milliseconds(10000));
-}
-void agent_graphic(sf::RenderWindow & window, pair < int, int > pos, string dir) {
-  sf::Image agent_up_image, agent_down_image, agent_left_image, agent_right_image;
-  if (!(agent_up_image.loadFromFile(AGENT_UP_IMAGE))) cout << "Cannot load image";
-  if (!(agent_down_image.loadFromFile(AGENT_DOWN_IMAGE))) cout << "Cannot load image";
-  if (!(agent_left_image.loadFromFile(AGENT_LEFT_IMAGE))) cout << "Cannot load image";
-  if (!(agent_right_image.loadFromFile(AGENT_RIGHT_IMAGE))) cout << "Cannot load image";
 
-  sf::Texture agent_texture;
-  sf::Sprite agent_sprite;
-  if (dir == "s") agent_texture.loadFromImage(agent_down_image);
-  if (dir == "w") agent_texture.loadFromImage(agent_up_image);
-  if (dir == "a") agent_texture.loadFromImage(agent_left_image);
-  if (dir == "d") agent_texture.loadFromImage(agent_right_image);
-  agent_sprite.setTexture(agent_texture);
-  agent_sprite.setPosition(pos.second, pos.first);
-  window.draw(agent_sprite);
-}
+
 void Game::turn() {
   sf::RenderWindow window(sf::VideoMode(50 * board.get_map()[0].size(), 50 * board.get_map().size() + 50), "BOZGHALE");
   time_t start, gametime;
