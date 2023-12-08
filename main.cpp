@@ -159,25 +159,6 @@ VVS init_keys_power(VVS map){
     map[wall_count[random_nums[4]].first][wall_count[random_nums[4]].second] = HIDE_POWER3;
     return map;
 }
-void show_map(VVS map, pair<int,int> pos,vector<pair<pair<int , int>,time_t>> cnt_bomb){
-    time_t st = time(0);
-    for(int i=0;i<map.size();i++){
-        for (int j=0;j<map[i].size();j++){
-            for (int k=0;k<cnt_bomb.size();k++){
-                if(i==cnt_bomb[k].first.first && j==cnt_bomb[k].first.second &&st-cnt_bomb[k].second<=2){
-                    cout<<BOMB<<CSV_DELIMITER;
-                }
-            }
-            if (i==pos.first && j==pos.second){
-                cout<<AGENT<<CSV_DELIMITER;
-            }
-            else{
-                cout<<map[i][j]<<CSV_DELIMITER;
-            }
-        }
-        cout<<endl;
-    }
-}
 void Map::init_map(){
     map = read_record(MAP_PATH);
     game_time = read_game_time(MAP_PATH);
@@ -250,7 +231,7 @@ VVS Agent::fire_bomb(VVS map){
     time_t startt=time(0);
 
     for(int i=0;i<cnt_bomb.size();i++){
-        if (startt - cnt_bomb[i].second==2){
+        if (startt - cnt_bomb[i].second==3){
             int row = cnt_bomb[i].first.first;
             int col = cnt_bomb[i].first.second;
             if (map[row][col-1]==HIDE_KEY || map[row][col-1] == HIDE_POWER2 || map[row][col-1]==HIDE_POWER3||map[row][col-1]==DOOR ||map[row][col-1]==WALL1){
@@ -329,7 +310,6 @@ Game::Game(){
 }
 void Game::init_game(){
     end_game = 0;
-    cout<<"game start"<<endl;
 }
 bool Game::check_win(int cnt_keys, pair<int,int> door,pair<int,int>agent_pos){
     if (cnt_keys==3 && door==agent_pos){
@@ -412,7 +392,7 @@ void map_graphic(sf::RenderWindow& window,VVS map, pair<int,int> pos,vector<pair
     }
 
 }
-void text_graphic(sf::RenderWindow& window, int life, time_t gametime,int row,int col){
+void text_graphic(sf::RenderWindow& window, int life, time_t gametime,int row,int col, int cnt_keys){
     sf::Font font;
     font.loadFromFile("Arial.ttf");
     sf::Text text;
@@ -424,6 +404,9 @@ void text_graphic(sf::RenderWindow& window, int life, time_t gametime,int row,in
     window.draw(text);
     text.setString("time:" + to_string(gametime));
     text.setPosition(150, 50*row);
+    window.draw(text);
+    text.setString("keys:" + to_string(cnt_keys));
+    text.setPosition(350, 50*row);
     window.draw(text);
 }
 void winlose_graphic(sf::RenderWindow& window,string str){
@@ -493,7 +476,7 @@ void Game::turn(){
                     agent_pos.second+=2;
                 }
             }
-            else if (event.type == sf::Event::KeyPressed){
+            if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::B){
                         agent.plant_bomb();
                 }
@@ -501,15 +484,13 @@ void Game::turn(){
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-
         agent.set_pos(make_pair((int)((agent_pos.first+12)/50),(int)((agent_pos.second+12)/50)));
         map_graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
-        text_graphic(window, agent.get_life(), time(0)-gametime, board.get_map().size(),board.get_map()[0].size());
+        text_graphic(window, agent.get_life(), time(0)-gametime, board.get_map().size(),board.get_map()[0].size(),agent.get_cnt_keys());
         agent_graphic(window,agent_pos,dir);
         if(check_win(agent.get_cnt_keys(),agent.get_door(),agent.get_pos()) || check_lose(agent.get_life())){
             break;
         }
-
         window.display();
         board.set_map(agent.collect(board.get_map()));
 
@@ -523,8 +504,6 @@ void Game::turn(){
             }
             agent.jiz_from_enemy(board.get_map());
             board.set_map(agent.fire_bomb(board.get_map()));
-            cout<<"-------------------------"<<endl;
-            show_map(board.get_map(), agent.get_pos(), agent.get_cnt_bomb());
             start=start+1;
         }
     }
@@ -533,7 +512,6 @@ void Game::turn(){
         winlose_graphic(window,"YOU LOSE");
     }
 }
-
 int main(){
     Game game;
     game.turn();
