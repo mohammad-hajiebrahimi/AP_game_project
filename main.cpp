@@ -19,7 +19,6 @@
 using namespace std;
 
 #define sep ' '
-#define delimiter ',,,'
 #define endl '\n'
 #define tab '\t'
 #define all(x)(x).begin(), (x).end()
