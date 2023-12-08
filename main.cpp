@@ -137,6 +137,10 @@ class Agent {
   int get_life() {
     return life;
   }
+
+
+
+  
   pair < bool,
   time_t > get_power3() {
     return has_power3;
