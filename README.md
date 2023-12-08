@@ -1,9 +1,16 @@
 # AP_game_project
+![Haji](Assets/game.png)
 Mohammad hossin hajiebrahimi
 
 Mohammad javad mohammadi
 
-In map file
+#### How to run
+```
+make
+make run
+make clean
+```
+#### In map file
 
 H : Indicates enemies that start moving horizontally from that cell.
 
