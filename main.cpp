@@ -43,22 +43,22 @@ const string H_ENEMYLEFT = "HL";
 const string H_ENEMYRIGHT = "HR";
 const string EMPTY = "-";
 const string BOMB = "T";
-const string GRASS_IMAGE = "grass.png";
-const string WALL1_IMAGE = "wall-1.png";
-const string WALL2_IMAGE = "wall-2.png";
-const string V_ENEMYUP_IMAGE = "up-enemy.png";
-const string V_ENEMYDOWN_IMAGE = "down-enemy.png";
-const string H_ENEMYLEFT_IMAGE = "left-enemy.png";
-const string H_ENEMYRIGHT_IMAGE = "right-enemy.png";
-const string KEY_IMAGE = "key.png";
-const string POWER2_IMAGE = "powerup2.jpeg";
-const string POWER3_IMAGE = "powerup3.jpeg";
-const string DOOR_IMAGE = "door.jpeg";
-const string BOMB_IMAGE = "bomb.png";
-const string AGENT_UP_IMAGE = "up.png";
-const string AGENT_DOWN_IMAGE = "down.png";
-const string AGENT_LEFT_IMAGE = "left.png";
-const string AGENT_RIGHT_IMAGE = "right.png";
+const string GRASS_IMAGE = "Pic/grass.png";
+const string WALL1_IMAGE = "Pic/wall-1.png";
+const string WALL2_IMAGE = "Pic/wall-2.png";
+const string V_ENEMYUP_IMAGE = "Pic/up-enemy.png";
+const string V_ENEMYDOWN_IMAGE = "Pic/down-enemy.png";
+const string H_ENEMYLEFT_IMAGE = "Pic/left-enemy.png";
+const string H_ENEMYRIGHT_IMAGE = "Pic/right-enemy.png";
+const string KEY_IMAGE = "Pic/key.png";
+const string POWER2_IMAGE = "Pic/powerup2.jpeg";
+const string POWER3_IMAGE = "Pic/powerup3.jpeg";
+const string DOOR_IMAGE = "Pic/door.jpeg";
+const string BOMB_IMAGE = "Pic/bomb.png";
+const string AGENT_UP_IMAGE = "Pic/up.png";
+const string AGENT_DOWN_IMAGE = "Pic/down.png";
+const string AGENT_LEFT_IMAGE = "Pic/left.png";
+const string AGENT_RIGHT_IMAGE = "Pic/right.png";
 typedef vector < vector < string >> VVS;
 
 VVS read_record(string fname) {
@@ -426,7 +426,7 @@ void map_graphic(sf::RenderWindow & window, VVS map, pair < int, int > pos, vect
 }
 void text_graphic(sf::RenderWindow & window, int life, time_t gametime, int row, int col, int cnt_keys) {
   sf::Font font;
-  font.loadFromFile("Arial.ttf");
+  font.loadFromFile("Pic/Arial.ttf");
   sf::Text text;
   text.setFont(font);
   text.setString("life:" + to_string(life));
@@ -443,7 +443,7 @@ void text_graphic(sf::RenderWindow & window, int life, time_t gametime, int row,
 }
 void winlose_graphic(sf::RenderWindow & window, string str) {
   sf::Font font;
-  font.loadFromFile("Arial.ttf");
+  font.loadFromFile("Pic/Arial.ttf");
   sf::Text text;
   text.setFont(font);
   text.setString(str);
