@@ -1,4 +1,5 @@
-
+#ifndef MAGIC
+#define MAGIC
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -44,3 +45,4 @@ const string AGENT_DOWN_IMAGE = "Pic/down.png";
 const string AGENT_LEFT_IMAGE = "Pic/left.png";
 const string AGENT_RIGHT_IMAGE = "Pic/right.png";
 typedef vector < vector < string >> VVS;
+#endif

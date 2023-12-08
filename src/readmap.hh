@@ -1,4 +1,5 @@
-
+#ifndef READMAP
+#define READMAP
 typedef vector < vector < string >> VVS;
 VVS read_record(string fname) {
   VVS content;
@@ -40,3 +41,4 @@ int read_game_time(string fname) {
   int game_time = stoi(line);
   return game_time;
 }
+#endif

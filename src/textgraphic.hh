@@ -1,3 +1,5 @@
+#ifndef TEXTGRAPHIC
+#define TEXTGRAPHIC
 void text_graphic(sf::RenderWindow & window, int life, time_t gametime, int row, int col, int cnt_keys) {
   sf::Font font;
   font.loadFromFile("Pic/Arial.ttf");
@@ -28,3 +30,4 @@ void winlose_graphic(sf::RenderWindow & window, string str) {
   window.display();
   sf::sleep(sf::milliseconds(10000));
 }
+#endif

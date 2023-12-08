@@ -1,3 +1,5 @@
+#ifndef MAPGRAPHIC
+#define MAPGRAPHIC
 void map_graphic(sf::RenderWindow & window, VVS map, pair < int, int > pos, vector < pair < pair < int, int > , time_t >> cnt_bomb) {
   int row = map.size();
   int col = map[0].size();
@@ -56,5 +58,5 @@ void map_graphic(sf::RenderWindow & window, VVS map, pair < int, int > pos, vect
       window.draw(bomb_sprite);
     }
   }
-
 }
+#endif

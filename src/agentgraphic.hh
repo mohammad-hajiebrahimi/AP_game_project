@@ -1,3 +1,5 @@
+#ifndef AGENTGRAPHIC
+#define AGENTGRAPHIC
 void agent_graphic(sf::RenderWindow & window, pair < int, int > pos, string dir) {
   sf::Image agent_up_image, agent_down_image, agent_left_image, agent_right_image;
   if (!(agent_up_image.loadFromFile(AGENT_UP_IMAGE))) cout << "Cannot load image";
@@ -15,3 +17,4 @@ void agent_graphic(sf::RenderWindow & window, pair < int, int > pos, string dir)
   agent_sprite.setPosition(pos.second, pos.first);
   window.draw(agent_sprite);
 }
+#endif
