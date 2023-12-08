@@ -16,15 +16,15 @@
 
 #include <SFML/System.hpp>
 
-#include "magic.hh"
+#include "src/magic.hh"
 
-#include "readmap.hh"
+#include "src/readmap.hh"
 
-#include "agentgraphic.hh"
+#include "src/agentgraphic.hh"
 
-#include "textgraphic.hh"
+#include "src/textgraphic.hh"
 
-#include "mapgraphic.hh"
+#include "src/mapgraphic.hh"
 
 class Map {
   public: Map();
