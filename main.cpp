@@ -163,6 +163,7 @@ class Agent {
   time_t >> cnt_bomb;
   int life;
 };
+
 void Agent::init_agent() {
   pos = make_pair(1, 1);
   cnt_keys = 0;
