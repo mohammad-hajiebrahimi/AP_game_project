@@ -51,23 +51,7 @@ const string AGENT_DOWN_IMAGE = "down.png";
 const string AGENT_LEFT_IMAGE = "left.png";
 const string AGENT_RIGHT_IMAGE = "right.png";
 typedef vector < vector < string >>    VVS;
-int kbhit(void) {
-    static bool initflag = false;
-    static const int STDIN = 0;
 
-    if (!initflag) {
-        struct termios term;
-        tcgetattr(STDIN, &term);
-        term.c_lflag &= ~ICANON;
-        tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
-        initflag = true;
-    }
-
-    int nbbytes;
-    ioctl(STDIN, FIONREAD, &nbbytes);
-    return nbbytes;
-}
 VVS read_record(string fname) {
     VVS content;
     vector < string > row;
@@ -237,19 +221,15 @@ void Map::update_enemy(){
 }
 bool Agent::make_move(string command, VVS map){
     if (command == "w" && map[pos.first-1][pos.second]!= DOOR && map[pos.first-1][pos.second]!=HIDE_POWER2 && map[pos.first-1][pos.second]!=HIDE_POWER3 &&map[pos.first-1][pos.second]!=HIDE_KEY && map[pos.first-1][pos.second]!= WALL2 && map[pos.first-1][pos.second]!= WALL1){
-        //pos = make_pair(pos.first-1,pos.second);
         return true;
     }
     if (command == "s" && map[pos.first+1][pos.second]!= DOOR && map[pos.first+1][pos.second]!=HIDE_POWER2 && map[pos.first+1][pos.second]!=HIDE_POWER3 &&map[pos.first+1][pos.second]!=HIDE_KEY && map[pos.first+1][pos.second]!= WALL2 && map[pos.first+1][pos.second]!= WALL1){
-        //pos = make_pair(pos.first+1,pos.second);
         return true;
     }
     if (command == "a" && map[pos.first][pos.second-1]!= DOOR && map[pos.first][pos.second-1]!=HIDE_POWER2 && map[pos.first][pos.second-1]!=HIDE_POWER3 &&map[pos.first][pos.second-1]!=HIDE_KEY && map[pos.first][pos.second-1]!=WALL2 && map[pos.first][pos.second-1]!=WALL1){
-        //pos = make_pair(pos.first, pos.second-1);
         return true;
     }
     if (command == "d" &&map[pos.first][pos.second+1]!= DOOR && map[pos.first][pos.second+1]!=HIDE_POWER2 && map[pos.first][pos.second+1]!=HIDE_POWER3 &&map[pos.first][pos.second+1]!=HIDE_KEY && map[pos.first][pos.second+1]!=WALL2 && map[pos.first][pos.second+1]!=WALL1){
-        //pos = make_pair(pos.first, pos.second+1);
         return true;
     }
     return false;
@@ -513,11 +493,16 @@ void Game::turn(){
                     agent_pos.second+=2;
                 }
             }
+            else if (event.type == sf::Event::KeyPressed){
+                if (event.key.code == sf::Keyboard::B){
+                        agent.plant_bomb();
+                }
+            }
             if (event.type == sf::Event::Closed)
                 window.close();
         }
 
-        agent.set_pos(make_pair((int)(agent_pos.first/50),(int)(agent_pos.second/50)));
+        agent.set_pos(make_pair((int)((agent_pos.first+12)/50),(int)((agent_pos.second+12)/50)));
         map_graphic(window,board.get_map(),agent.get_pos(),agent.get_cnt_bomb());
         text_graphic(window, agent.get_life(), time(0)-gametime, board.get_map().size(),board.get_map()[0].size());
         agent_graphic(window,agent_pos,dir);
@@ -525,19 +510,9 @@ void Game::turn(){
             break;
         }
 
-        if (kbhit()){
-            char c;
-            c = getchar();
-            string input="";
-            input+=c;
-            if (input == "b"){
-                agent.plant_bomb();
-            }
-            //agent_graphic(window,agent.get_pos(),input);
-            agent.make_move(input, board.get_map());
-        }
         window.display();
         board.set_map(agent.collect(board.get_map()));
+
         if(time(0)-start==1)
         {
             if (!agent.get_power3().first){
@@ -546,8 +521,8 @@ void Game::turn(){
             else if(agent.get_power3().first && time(0)-agent.get_power3().second>=10){
                 board.update_enemy();
             }
-            board.set_map(agent.fire_bomb(board.get_map()));
             agent.jiz_from_enemy(board.get_map());
+            board.set_map(agent.fire_bomb(board.get_map()));
             cout<<"-------------------------"<<endl;
             show_map(board.get_map(), agent.get_pos(), agent.get_cnt_bomb());
             start=start+1;
