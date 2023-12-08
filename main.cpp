@@ -237,7 +237,6 @@ void Map::update_enemy() {
     }
   }
   map = map1;
-  
 }
 bool Agent::make_move(string command, VVS map) {
   if (command == "w" && map[pos.first - 1][pos.second] != DOOR && map[pos.first - 1][pos.second] != HIDE_POWER2 && map[pos.first - 1][pos.second] != HIDE_POWER3 && map[pos.first - 1][pos.second] != HIDE_KEY && map[pos.first - 1][pos.second] != WALL2 && map[pos.first - 1][pos.second] != WALL1) {
